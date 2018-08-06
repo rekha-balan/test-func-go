@@ -7,6 +7,10 @@ __dirname=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 __root=$(cd "${__dirname}/../" && pwd)
 if [[ ! -f "${__root}/.env" ]]; then cp "${__root}/.env.tpl" "${__root}/.env"; fi
 source "${__root}/.env"
+source "${__dirname}/util/rm_helpers.sh"
+source "${__dirname}/util/helpers.sh"
+export -f ensure_group  # from rm_helpers.sh, make available to children
+export -f debug # from helpers.sh, echo to /dev/stderr
 ## end prolog
 
 ## parameters
@@ -15,13 +19,17 @@ declare -i hosted=${2:-0}   # 0: false; 1: true
 declare -i continue=${3:-1} # 0: stop;  1: follow; 2: background
 declare run_image_uri=${4:-"${RUNTIME_IMAGE_REGISTRY}/${RUNTIME_IMAGE_REPO}:${RUNTIME_IMAGE_TAG}"}
 declare instance_name=${5:-${RUNTIME_INSTANCE_NAME}}
-declare sa_name="${6:-${BASE_RESOURCE_NAME}storsmoker}"
-declare cdb_name="${6:-${BASE_RESOURCE_NAME}cosmossmoker}"
-declare sb_name="${6:-${BASE_RESOURCE_NAME}sbsmoker}"
-declare eh_name="${6:-${BASE_RESOURCE_NAME}ehsmoker}"
+declare group_name="${6:-${AZURE_GROUP_NAME_BASE}-smoker}"
+declare location=${7:-${AZURE_LOCATION_DEFAULT}}
 
-declare group_name="${7:-${AZURE_GROUP_NAME_BASE}-smoker}"
-declare location=${8:-${AZURE_LOCATION_DEFAULT}}
+declare sa_name="${BASE_RESOURCE_NAME}storsmoker"
+declare sa_connstr=
+declare sb_name="${BASE_RESOURCE_NAME}sbsmoker"
+declare sb_connstr=
+declare eh_name="${BASE_RESOURCE_NAME}ehsmoker"
+declare eh_connstr=
+declare cdb_name="${BASE_RESOURCE_NAME}cosmossmoker"
+declare cdb_connstr=
 ## end parameters
 
 ## prepare run image
@@ -31,23 +39,28 @@ ${__dirname}/build.sh $publish
 
 ## ensure storage
 echo "ensuring storage account [${sa_name}]"
-${__dirname}/util/setup_storage.sh $sa_name $group_name $location
+# out var `sa_connstr`
+sa_connstr=$(${__dirname}/util/setup_storage.sh $sa_name $group_name $location)
+echo "sa_connstr: [${sa_connstr}]"
 ## end ensure storage
+
+## ensure service bus
+echo "ensuring service bus queues [${sb_name}]"
+sb_connstr=$(${__dirname}/util/setup_servicebus.sh $sb_name $group_name $location)
+echo "sb_connstr: [${sb_connstr}]"
+## end ensure service bus
 
 ## ensure event hub
 echo "ensuring event hubs [${eh_name}]"
-${__dirname}/util/setup_eventhub.sh $eh_name $group_name $location
+eh_connstr=$(${__dirname}/util/setup_eventhub.sh $eh_name $group_name $location)
+echo "eh_connstr: [${eh_connstr}]"
 ## end ensure event hub
 
 ## ensure cosomosdb
 echo "ensuring cosmosdb account [${cdb_name}]"
-${__dirname}/util/setup_cosmosdb.sh $sacdb_name_name $group_name $location
+cdb_connstr=$(${__dirname}/util/setup_cosmosdb.sh $cdb_name $group_name $location)
+echo "cdb_connstr: [${cdb_connstr}]"
 ## end ensure cosmosdb
-
-## ensure service bus
-echo "ensuring service bus queues [${sb_name}]"
-${__dirname}/util/setup_servicebus.sh $sb_name $group_name $location
-## end ensure service bus
 
 ## test instance
 # start_instance starts an instance of the Functions runtime
@@ -62,12 +75,17 @@ function start_instance() {
     if [[ $hosted == 1 ]]; then
         echo "running runtime in App Service plan"
         # workaround for <https://github.com/Azure/azure-cli/issues/6918>
-        # TODO: when resolved, don't require a group name at all, set that up
-        #       automatically
+        # when resolved, consider setting group name in functionapp scripts
         instance_group_name=$sa_group_name
         # TODO: check $instance_name availability
+        declare -a settings=(
+            "ServiceBusConnectionString=$sb_connstr" \
+            "EventHubsConnectionString=$eh_connstr" \
+            "CosmosDBConnectionString=$cdb_connstr"
+        )
         ${__dirname}/util/setup_functionapp.sh \
-            $instance_name $instance_group_name $sa_name $sa_group_name
+            $instance_name $instance_group_name $sa_name $sa_group_name $location \
+            $run_image_uri "${settings[*]}"
     else
         echo "running runtime locally via Docker"
         # stop current running instance if necessary
@@ -76,19 +94,21 @@ function start_instance() {
             docker container stop $instance_name
         fi
 
-        connstr=$(az storage account show-connection-string \
-            --name $sa_name \
-            --resource-group $sa_group_name \
-            --key primary \
-            --protocol https \
-            --query 'connectionString' --output tsv)
+        # default env var names:
+        #   EventHubsConnectionString
+        #   ServiceBusConnectionString
+        #   AzureWebJobsStorage
+        #   CosmosDBConnectionString
 
         # running detached first so we can run tests
         # will attach or stop at end per $continue
         docker container run --rm --detach \
             --name $instance_name \
             --publish "${published_port}:80" \
-            --env "AzureWebJobsStorage=$connstr" \
+            --env "AzureWebJobsStorage=$sa_connstr" \
+            --env "ServiceBusConnectionString=$sb_connstr" \
+            --env "EventHubsConnectionString=$eh_connstr" \
+            --env "CosmosDBConnectionString=$cdb_connstr" \
             "${run_image_uri}"
 
         # wait for worker to be ready

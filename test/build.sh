@@ -4,6 +4,7 @@
 set -o errexit
 __filename=${BASH_SOURCE[0]}
 __dirname=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+__root="${__dirname}/../"
 source "${__dirname}/../.env"
 ## end prolog
 
@@ -13,8 +14,7 @@ declare run_image_uri=${4:-"${RUNTIME_IMAGE_REGISTRY}/${RUNTIME_IMAGE_REPO}:${RU
 ## end parameters
 
 echo "building image \`${run_image_uri}\` with Functions runtime and go worker"
-worker_root="${__dirname}/../"
-docker build -t "${run_image_uri}" -f "$worker_root"/Dockerfile.bundle "$worker_root"
+docker build -t "${run_image_uri}" -f "${__root}/Dockerfile.bundle" "${__root}"
 
 if [[ ( $publish == 1 ) && ( "$RUNTIME_IMAGE_REGISTRY" != "local" ) ]]; then
     echo "pushing image to registry defined in environment"

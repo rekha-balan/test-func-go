@@ -11,11 +11,10 @@ WORKDIR /go/src/github.com/Azure/azure-functions-go
 ENV DEP_RELEASE_TAG=v0.5.0
 COPY . .
 COPY --from=dotnet-env /sample ./sample
-RUN ls -R ./sample
 RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh \
     && dep ensure -v -vendor-only \
     && chmod +x ./build.sh \
-    && ./build.sh native bundle
+    && ./build.sh native bundle verbose
 
 # 3. copy built worker and extensions to runtime image
 # ARG instructions used here must be declared before first FROM

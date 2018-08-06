@@ -5,14 +5,14 @@
       "type": "eventHubTrigger",
       "name": "ehMsg",
       "eventHubName": "demo-go-func-in",
-      "connection": "EventHubConnectionSetting",
+      "connection": "EventHubsConnectionString",
       "direction": "in"
     },
     {
       "type": "eventHub",
       "name": "ehOut",
       "eventHubName": "demo-go-func-out",
-      "connection": "EventHubConnectionSetting",
+      "connection": "EventHubsConnectionString",
       "direction": "out"
     }
   ],

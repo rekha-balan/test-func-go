@@ -4,8 +4,8 @@
 # add `-gcflags '-N -l'` to 'go build ...' to compile for debugging
 
 mode=$1 # use 'native' to do a native build , 'docker' to build through docker(default).
-verbose=$2
-bundle=$3 # use 'bundle' to build the samples also, otherwise only the worker will be built.
+bundle=$2 # use 'bundle' to build the samples also, otherwise only the worker will be built.
+verbose=$3
 
 if [ "$verbose" == 'verbose' ]; then
     set -ev

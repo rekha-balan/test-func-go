@@ -23,8 +23,9 @@ batteries (i.e. prebuilt samples) included to:
 **NOTE** that to use Azure App Service you must specify a public registry for
 `RUNTIME_IMAGE_REGISTRY` in `.env` rather than `local`.
 
-The local-instance creates and utilizes an Azure Storage account. The
-azure-instance also creates and utilizes an App Service plan and functionapp.
+Each instance is created with a Storage account, CosmosDB account, Service Bus
+namespace, and Event Hubs namespace. The azure-instance also creates and
+utilizes an App Service plan and functionapp.
 
 Some triggers are triggered after the instance is created. (TODO: make them
 skippable; and verify success.)
@@ -33,47 +34,73 @@ Default instance configuration options can be overriden by maintaining your own
 `.env` file in the root of your clone. When no `.env` file is found one is
 created based on `.env.tpl`.
 
-### Other Options
+## Other Options
 
-- Build the Functions runtime including the Go worker in this repo:
-  `test/build.sh`. Add `1` as a parameter to also push to a registry. The image
-  name is built from configuration in `.env`.
+You can also build and run the container image manually, or even build and run
+the runtime and worker locally without containers.
 
-- Run an instance of the runtime: `docker run --rm --publish 8080:80 --env "AzureWebJobsStorage=$STORAGE_CONNSTR" local/azure-functions-go-worker:dev`.
-  (The image name chosen reflects the defaults in `.env.tpl`.)
+### Build and run in a container
 
-To discover your Storage account connection string consider using `az storage account show-connection-string ...`.
+1. Build the Functions runtime with Go worker into a container image with
+   `test/build.sh`. Add `1` as a parameter to also push to a registry. The
+   image name is built from configuration in `.env`.
 
-To run **Event Hubs** samples, set a namespace connection string in an environment
-variable, and specify that environment variable name as the value of the
-`connection` field in the functionapp's `function.json`. The variable name used
-in the samples is "EventHubConnectionSetting". This applies for **Service Bus** and **CosmosDb** samples.
+1. Run an instance of the runtime with Docker, providing connection strings in
+   env vars to connect to Azure services, as in the following commands; more
+   details on these connection strings in the following section. The image name
+   chosen reflects the defaults in `.env.tpl`.
 
-To discover the connection strings required you can use:
+```bash
+run_image_uri=local/azure-functions-go-with-samples:dev
+published_port=8080
+docker container run --rm --detach \
+    --name $instance_name \
+    --publish "${published_port}:80" \
+    --env "AzureWebJobsStorage=$sa_connstr" \
+    --env "ServiceBusConnectionString=$sb_connstr" \
+    --env "EventHubsConnectionString=$eh_connstr" \
+    --env "CosmosDBConnectionString=$cdb_connstr" \
+    "${run_image_uri}"
+```
 
-- for **Event Hubs**: `az eventhubs namespace authorization-rule list ...`.
-- for **CosmosDb**: `az cosmosdb list-keys` and then the format `connstr="AccountEndpoint=https://$account_name.documents.azure.com:443/;AccountKey=$account_key;"`
-- for **Service Bus**: `az servicebus namespace authorization-rule keys list ...`
+### Connections to Azure Services
 
-### Run locally without containers
+For the Functions runtime to handle their events it must be able to connect to
+Azure services.  This is faciliated by connection strings retrieved by the
+runtime from environment variables. *Connection strings* in Azure are
+collections of semi-colon-delimited name-value pairs with details for
+connecting to a service.  The names of env vars to look for are as specified in
+`function.json` files; the following names are used in all our samples and
+scripts, and we recommend you don't change them.
 
-- Build the worker and the samples: `build.sh native bundle`
-- Get and install the [functions runtime](https://github.com/Azure/azure-functions-host)
-  per instructions in that repo.
-- Set environment variables:
+For your convenience, CLI commands for getting these strings are also listed.
+
+    * AzureWebJobsStorage - `az storage account show-connection-string ...`
+    * ServiceBusConnectionString - `az servicebus namespace authorization-rule keys list ...`
+    * EventHubsConnectionString - `az eventhubs namespace authorization-rule keys list ...`
+    * CosmosDBConnectionString - `az cosmosdb list-keys ...`, formatted into
+      `AccountEndpoint=https://${account_name}.documents.azure.com:443/;AccountKey=${account_key};"`
+
+### Build and run locally without containers
+
+1. Build the worker and the samples: `build.sh`
+1. Get and install the [functions
+   runtime](https://github.com/Azure/azure-functions-host) per instructions in
+   that repo.
+1. Set environment variables:
 
 ```bash
 FUNCTIONS_WORKER_RUNTIME=golang              # intended target language worker
 AzureWebJobsScriptRoot=/home/site/wwwroot    # path in container fs to user code
 AzureWebJobsStorage=                         # Storage account connection string
-EventHubConnectionSetting=                   # Event Hubs namespace connection string
-ServiceBusConnectionString=                  # Service Bus namespace SAS Policy ConnectionString
-CosmosDBConnectionString=                     # Cosmos Db account connection string
+EventHubsConnectionString=                   # Event Hubs namespace connection string
+ServiceBusConnectionString=                  # Service Bus namespace connection string
+CosmosDBConnectionString=                    # CosmosDB connection string
 ```
 
-- In `github.com/Azure/azure-functions-host`, modify
-  `src/WebJobs.Script.WebHost/appsettings.json` as follows to specify the
-  path to the Go worker:
+1. In `github.com/Azure/azure-functions-host`, modify
+   `src/WebJobs.Script.WebHost/appsettings.json` as follows to specify the path
+   to the Go worker:
 
 ```json
 "langaugeWorkers": {
@@ -126,7 +153,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
         ctx.Log(azfunc.LogInformation,"function invoked: function %v, invocation %v", ctx.FunctionID(), ctx.InvocationID())
 
         // use Go's standard library to:
-    	//  handle incoming request:
+        //  handle incoming request:
         body, _ := ioutil.ReadAll(req.Body)
 
         // to deserialize JSON content:
@@ -144,8 +171,8 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
             return nil, fmt.Errorf("missing required query parameter: name")
         }
 
-    	// Prepare a struct to return. The special output binding name
-    	// `$return` transforms the struct into near-equivalent JSON.
+        // Prepare a struct to return. The special output binding name
+        // `$return` transforms the struct into near-equivalent JSON.
         u := &User{
             Name:     name,
             Greeting: fmt.Sprintf("Hello %s. %s\n", name, data["greeting"].(string)),
@@ -173,10 +200,10 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
       "entryPoint": "Run",
       "bindings": [
         {
-          "name": "req"
+          "name": "req",
           "type": "httpTrigger",
           "direction": "in",
-          "authLevel": "anonymous",
+          "authLevel": "anonymous"
         },
         {
           "name": "$return",
@@ -206,29 +233,29 @@ Now your Function is live and ready to handle events. Time to trigger it!
     execute a request with the following parameters (in this case for a local
     instance on port 8080):
 
-        ```
-        HTTP Method: `POST`
-        URL: `http://localhost:8080/api/HttpTrigger?name=world`
-        Headers: `Content-Type: application/json`
-        Body: `{"greeting": "How are you?"}`
-        ```
+    ```
+    HTTP Method: `POST`
+    URL: `http://localhost:8080/api/HttpTrigger?name=world`
+    Headers: `Content-Type: application/json`
+    Body: `{"greeting": "How are you?"}`
+    ```
 
-        ```bash
-        declare PORT=8080 PERSON_NAME=world
-        curl -L "http://localhost:${PORT}/api/HttpTrigger?name=${PERSON_NAME}" \
-            --data '{ "greeting": "How are you?" }' \
-            --header 'Content-Type: application/json' \
-        ```
+    ```bash
+    declare PORT=8080 PERSON_NAME=world
+    curl -L "http://localhost:${PORT}/api/HttpTrigger?name=${PERSON_NAME}" \
+        --data '{ "greeting": "How are you?" }' \
+        --header 'Content-Type: application/json' \
+    ```
 
-        The `Run` method from the sample should be executed and a User object with
-        Name and Greeting properties like the following should be returned:
+    The `Run` method from the sample should be executed and a User object with
+    Name and Greeting properties like the following should be returned:
 
-        ```json
-        {
-          "Name": "world",
-          "Greeting": "Hello world. How are you?\n"
-        }
-        ```
+    ```json
+    {
+      "Name": "world",
+      "Greeting": "Hello world. How are you?\n"
+    }
+    ```
 
 # More information
 

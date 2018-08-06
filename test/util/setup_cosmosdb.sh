@@ -12,45 +12,62 @@ location=$3
 db_name="Documents"
 collection_names=(reports tasks)
 
-"echo creating group $group_name"
-az group create \
-    --name $group_name \
-    --location $location \
-    --output tsv --query id
+group_id=$(ensure_group $group_name)
+debug "group_id: $group_id"
 
 name_available=$(az cosmosdb check-name-exists \
     --name $account_name \
-     --output tsv)
-echo "cosmos db account name $account_name available? $name_available"
+    --output tsv)
+debug "cosmos db account name $account_name available? $name_available"
 
-echo "creating cosmosdb account $account_name"
+debug "creating cosmosdb account $account_name"
 account_id=$(az cosmosdb create \
     --name $account_name \
     --resource-group $group_name \
     --kind 'GlobalDocumentDB' \
     --query id --output tsv)
-echo "created cosmosdb account: $account_id"
+debug "created cosmosdb account: $account_id"
 
-
-echo "getting account key"
+debug "getting account key and making connstr"
 account_key=$(az cosmosdb list-keys \
     --name $account_name \
     --resource-group $group_name \
     --query "primaryMasterKey" -o tsv)
 
-connstr="AccountEndpoint=https://$account_name.documents.azure.com:443/;AccountKey=$account_key;"
+connstr="AccountEndpoint=https://${account_name}.documents.azure.com:443/;AccountKey=${account_key};"
 
-echo "creating cosmosdb database $db_name"
-az cosmosdb database create \
+debug "ensuring cosmosdb database [$db_name]"
+db_id=$(az cosmosdb database show \
     --db-name $db_name \
     --name $account_name \
-    --resource-group $group_name
+    --resource-group-name $group_name \
+    --output tsv --query 'id' 2> /dev/null)
+if [[ -z $db_id ]]; then
+    db_id=$(az cosmosdb database create \
+        --db-name $db_name \
+        --name $account_name \
+        --resource-group $group_name \
+        --output tsv --query 'id')
+fi
+debug "ensured cosmosdb database: [$db_id]"
 
-echo "creating collections"
+debug "ensuring collections"
 for collection_name in ${collection_names[@]}; do
-    az cosmosdb collection create \
+    coll_id=$(az cosmosdb collection show \
         --collection-name $collection_name \
-        --db-name $db_name
-        --resource-group $group_name
-        --output tsv --query name
+        --db-name $db_name \
+        --name $account_name \
+        --resource-group-name $group_name \
+        --output tsv --query 'collection.id' 2> /dev/null)
+    if [[ -z $coll_id ]]; then
+        coll_id=$(az cosmosdb collection create \
+            --collection-name $collection_name \
+            --db-name $db_name \
+            --name $account_name \
+            --resource-group-name $group_name \
+            --output tsv --query 'collection.id')
+    fi
+    debug "ensured collection: [$coll_id]"
 done
+
+echo $connstr

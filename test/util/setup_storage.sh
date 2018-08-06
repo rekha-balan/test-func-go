@@ -12,38 +12,34 @@ location=$3
 container_names=(demo demo-out)
 queue_name=demoqueue
 
-echo creating group $group_name
-az group create \
-    --name $group_name \
-    --location $location \
-    --output tsv --query id
+group_id=$(ensure_group $group_name)
 
 name_available=$(az storage account check-name \
     -n $account_name \
     --query nameAvailable --output tsv)
-echo "storage name $account_name available? $name_available"
+debug "storage name $account_name available? $name_available"
 
-echo creating storage account $account_name
+debug "creating storage account $account_name"
 account_id=$(az storage account create \
     --name $account_name \
     --resource-group $group_name \
     --location $location \
     --sku 'Standard_LRS' \
     --query id --output tsv)
-echo "created storage account: $account_id"
+debug "created storage account: $account_id"
 
-echo getting account key
+debug "getting account key"
 key=$(az storage account keys list \
     --account-name $account_name \
     --resource-group $group_name \
     --query '[0].value' -o tsv)
 
-echo getting account connstr
+debug "getting account connstr"
 connstr=$(az storage account show-connection-string \
             --ids $account_id \
             --query connectionString --output tsv)
 
-echo creating containers
+debug "creating containers"
 for container_name in ${container_names[@]}; do
     az storage container create \
         --name $container_name \
@@ -52,9 +48,12 @@ for container_name in ${container_names[@]}; do
         --output tsv --query name
 done
 
-echo creating queues
+debug "creating queues"
 az storage queue create \
     --name $queue_name \
     --account-key $key \
     --account-name $account_name \
     --query name --output tsv
+
+echo "$connstr"
+

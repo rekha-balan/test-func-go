@@ -1,5 +1,5 @@
 RUNTIME_IMAGE_REGISTRY=local
-RUNTIME_IMAGE_REPO=azure-functions-go-worker
+RUNTIME_IMAGE_REPO=azure-functions-go-with-samples
 RUNTIME_IMAGE_TAG=dev
 
 RUNTIME_INSTANCE_NAME=azure-functions-go-tester-${RANDOM}
