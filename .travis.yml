@@ -25,6 +25,6 @@ script:
   - test -z "$(golint $(go list ./... | grep -v 'vendor|rpc') |  tee /dev/stderr)"
   - go vet $(go list ./... | grep -v 'vendor|rpc')
   - test -z "$(gosec ./internal/... | tee /dev/stderr | grep Error -v pb.go)"
-  - ./build.sh native verbose
+  - ./build.sh native verbose bundle
   - go generate ./internal/runtime/testdata/HttpTriggerBlobBindings/...
   - go test ./internal/... | grep -v "no test files"

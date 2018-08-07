@@ -1,9 +1,9 @@
 # Azure Functions for Go
 
-[![Build Status](https://travis-ci.com/Azure/azure-functions-go-worker.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go-worker)
+[![Build Status](https://travis-ci.com/Azure/azure-functions-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go)
 
 This project adds Go support to Azure Functions by implementing a [language
-worker][] for Go.
+worker][] for Go. Note that only Go 1.10+ is supported. Supported platforms are Linux and Mac.
 
 [language worker]: https://github.com/Azure/azure-functions-host/wiki/Language-Extensibility
 
@@ -57,7 +57,7 @@ To discover the connection strings required you can use:
 
 ### Run locally without containers
 
-- Build the worker and the samples: `build.sh`
+- Build the worker and the samples: `build.sh native bundle`
 - Get and install the [functions runtime](https://github.com/Azure/azure-functions-host)
   per instructions in that repo.
 - Set environment variables:
@@ -78,7 +78,7 @@ CosmosDBConnectionString=                     # Cosmos Db account connection str
 ```json
 "langaugeWorkers": {
   "workersDirectory":
-     "/home/functions-user/go/src/github.com/Azure/azure-functions-go-worker/workers"
+     "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
 }
 ```
 
@@ -97,7 +97,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
 > on the programming model.
 
 [the httptrigger sample]: ./sample/HttpTrigger
-[the wiki]: https://github.com/Azure/azure-functions-go-worker/wiki/Programming-Model
+[the wiki]: https://github.com/Azure/azure-functions-go/wiki/Programming-Model
 
 ## Write a Go Function
 
@@ -114,7 +114,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
         "io/ioutil"
         "net/http"
 
-        "github.com/Azure/azure-functions-go-worker/azfunc"
+        "github.com/Azure/azure-functions-go/azfunc"
     )
 
     // Run runs this Azure Function if/because it is specified in `function.json` as

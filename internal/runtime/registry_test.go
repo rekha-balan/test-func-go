@@ -1,4 +1,6 @@
-// +build linux,cgo darwin,cgo
+// +build linux darwin
+// +build go1.10
+// +build cgo
 
 package runtime
 
@@ -8,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azure-functions-go-worker/azfunc"
-	"github.com/Azure/azure-functions-go-worker/internal/rpc"
+	"github.com/Azure/azure-functions-go/azfunc"
+	"github.com/Azure/azure-functions-go/internal/rpc"
 	"github.com/golang/protobuf/jsonpb"
 )
 

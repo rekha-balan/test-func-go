@@ -3,7 +3,7 @@ package runtime
 import (
 	"reflect"
 
-	"github.com/Azure/azure-functions-go-worker/internal/rpc"
+	"github.com/Azure/azure-functions-go/internal/rpc"
 )
 
 // function contains a function symbol with in and out param types

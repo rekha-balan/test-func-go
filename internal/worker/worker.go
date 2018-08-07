@@ -1,8 +1,8 @@
 package worker
 
 import (
-	"github.com/Azure/azure-functions-go-worker/internal/rpc"
-	"github.com/Azure/azure-functions-go-worker/internal/runtime"
+	"github.com/Azure/azure-functions-go/internal/rpc"
+	"github.com/Azure/azure-functions-go/internal/runtime"
 	log "github.com/Sirupsen/logrus"
 )
 
