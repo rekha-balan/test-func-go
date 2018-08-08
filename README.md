@@ -3,7 +3,12 @@
 [![Build Status](https://travis-ci.com/Azure/azure-functions-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go)
 
 This project adds Go support to Azure Functions by implementing a [language
-worker][] for Go. Note that only Go 1.10+ is supported. Supported platforms are Linux and Mac.
+worker][] for Go. It requires the following:
+
+* Go 1.10+
+* Linux or OS X
+* Docker
+* [Azure CLI](https://github.com/Azure/azure-cli)
 
 [language worker]: https://github.com/Azure/azure-functions-host/wiki/Language-Extensibility
 
@@ -14,18 +19,29 @@ worker][] for Go. Note that only Go 1.10+ is supported. Supported platforms are 
 
 # Run a Go Functions instance
 
-Clone the repo and run one of the following to deploy an instance with
-batteries (i.e. prebuilt samples) included to:
+During preview you must build and deploy your own Functions instance with the
+Go worker included. To do so clone this repo and run one of the following to
+deploy an instance with bundled samples from the `sample` directory:
 
-- your friendly local Docker daemon: `make local-instance`
-- Azure App Service: `make azure-instance`
+- To deploy to a local Docker daemon: `make local-instance`
+- To deploy to Azure App Service: `make azure-instance`
 
-**NOTE** that to use Azure App Service you must specify a public registry for
-`RUNTIME_IMAGE_REGISTRY` in `.env` rather than `local`.
+Deployment to App Service relies on its support for [custom images][].
 
-Each instance is created with a Storage account, CosmosDB account, Service Bus
-namespace, and Event Hubs namespace. The azure-instance also creates and
-utilizes an App Service plan and functionapp.
+[custom images]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-linux-custom-image
+
+**NOTE** that to use Azure App Service you must specify a public registry which
+you have push access to for `RUNTIME_IMAGE_REGISTRY` in `.env` rather than
+`local`.
+
+The make tasks utilize Azure CLI and will deploy to the logged-in
+subscription/account using the logged-in user's credentials. You must install
+the CLI and login with `az login` before running `make`, and you must have
+rights to create the needed resources.
+
+**NOTE** that each instance created this way includes a connected Storage
+account, CosmosDB account, Service Bus namespace, and Event Hubs namespace. The
+azure-instance also creates and utilizes an App Service plan and functionapp.
 
 Some triggers are triggered after the instance is created. (TODO: make them
 skippable; and verify success.)
@@ -42,76 +58,78 @@ the runtime and worker locally without containers.
 ### Build and run in a container
 
 1. Build the Functions runtime with Go worker into a container image with
-   `test/build.sh`. Add `1` as a parameter to also push to a registry. The
-   image name is built from configuration in `.env`.
+   `test/build_container.sh`. Add `1` as a parameter to also push to a
+   registry, and add 'sample' or 'usr' to also build user functions in those
+   directories. The image name is built from configuration in `.env` by
+   default.
 
 1. Run an instance of the runtime with Docker, providing connection strings in
    env vars to connect to Azure services, as in the following commands; more
    details on these connection strings in the following section. The image name
    chosen reflects the defaults in `.env.tpl`.
 
-```bash
-run_image_uri=local/azure-functions-go-with-samples:dev
-published_port=8080
-docker container run --rm --detach \
-    --name $instance_name \
-    --publish "${published_port}:80" \
-    --env "AzureWebJobsStorage=$sa_connstr" \
-    --env "ServiceBusConnectionString=$sb_connstr" \
-    --env "EventHubsConnectionString=$eh_connstr" \
-    --env "CosmosDBConnectionString=$cdb_connstr" \
-    "${run_image_uri}"
-```
+    ```bash
+    run_image_uri=local/azure-functions-go-with-samples:dev
+    published_port=8080
+    docker container run --rm --detach \
+        --name functions-tester \
+        --publish "${published_port}:80" \
+        --env "AzureWebJobsStorage=$sa_connstr" \
+        --env "ServiceBusConnectionString=$sb_connstr" \
+        --env "EventHubsConnectionString=$eh_connstr" \
+        --env "CosmosDBConnectionString=$cdb_connstr" \
+        "${run_image_uri}"
+    ```
 
 ### Connections to Azure Services
 
 For the Functions runtime to handle their events it must be able to connect to
 Azure services.  This is faciliated by connection strings retrieved by the
 runtime from environment variables. *Connection strings* in Azure are
-collections of semi-colon-delimited name-value pairs with details for
+collections of semicolon-delimited name-value pairs with details for
 connecting to a service.  The names of env vars to look for are as specified in
 `function.json` files; the following names are used in all our samples and
 scripts, and we recommend you don't change them.
 
 For your convenience, CLI commands for getting these strings are also listed.
 
-    * AzureWebJobsStorage - `az storage account show-connection-string ...`
-    * ServiceBusConnectionString - `az servicebus namespace authorization-rule keys list ...`
-    * EventHubsConnectionString - `az eventhubs namespace authorization-rule keys list ...`
-    * CosmosDBConnectionString - `az cosmosdb list-keys ...`, formatted into
-      `AccountEndpoint=https://${account_name}.documents.azure.com:443/;AccountKey=${account_key};"`
+* AzureWebJobsStorage - `az storage account show-connection-string ...`
+* ServiceBusConnectionString - `az servicebus namespace authorization-rule keys list ...`
+* EventHubsConnectionString - `az eventhubs namespace authorization-rule keys list ...`
+* CosmosDBConnectionString - `az cosmosdb list-keys ...`, formatted into
+  `AccountEndpoint=https://${account_name}.documents.azure.com:443/;AccountKey=${account_key};"`
 
 ### Build and run locally without containers
 
-1. Build the worker and the samples: `build.sh`
+1. Build the worker and the samples: `test/build.sh native sample`
 1. Get and install the [functions
    runtime](https://github.com/Azure/azure-functions-host) per instructions in
    that repo.
 1. Set environment variables:
 
-```bash
-FUNCTIONS_WORKER_RUNTIME=golang              # intended target language worker
-AzureWebJobsScriptRoot=/home/site/wwwroot    # path in container fs to user code
-AzureWebJobsStorage=                         # Storage account connection string
-EventHubsConnectionString=                   # Event Hubs namespace connection string
-ServiceBusConnectionString=                  # Service Bus namespace connection string
-CosmosDBConnectionString=                    # CosmosDB connection string
-```
+    ```bash
+    FUNCTIONS_WORKER_RUNTIME=golang              # intended target language worker
+    AzureWebJobsScriptRoot=/home/site/wwwroot    # path in container fs to user code
+    AzureWebJobsStorage=                         # Storage account connection string
+    EventHubsConnectionString=                   # Event Hubs namespace connection string
+    ServiceBusConnectionString=                  # Service Bus namespace connection string
+    CosmosDBConnectionString=                    # CosmosDB connection string
+    ```
 
 1. In `github.com/Azure/azure-functions-host`, modify
    `src/WebJobs.Script.WebHost/appsettings.json` as follows to specify the path
    to the Go worker:
 
-```json
-"langaugeWorkers": {
-  "workersDirectory":
-     "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
-}
-```
+    ```json
+    "langaugeWorkers": {
+      "workersDirectory":
+         "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
+    }
+    ```
 
 # Write and deploy a Go Function
 
-Follow these high-level steps to create Go Functions:
+Follow these steps to create Go Functions:
 
 1.  Write a Go Function.
 2.  Deploy it.
@@ -217,13 +235,45 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
 
 ## Deploy it
 
-With your Function written, package and deploy it to a Go Functions instance.
+With your Function written, you're ready to package and deploy it to a Go Functions instance.
 
-If you need an instance see [Run an instance][].
+During preview the recommended pattern for deployment is to build an image with
+runtime, Golang worker, and user functions included. To facilitate this we've
+provided a `usr` directory where you can put properly structured function
+files, and then run `make local-instance-with-usr` (or `make
+azure-instance-with-usr`) to automatically build and include your functions in
+the image.
 
-[run an instance]: #run-a-go-functions-instance
+Each function should be in a directory bearing its intended name. Within that
+directory there should be a main.go and function.json file. On build, a file
+`bin/${function_name}.so` will also be added to the directory. All three files
+(even the source in main.go) are used by the runtime.
 
-**TODO(joshgav)**: add scripts and instructions.
+The structure of a function is as follows (paths marked * are added by builder):
+
+```
+| UserFunc1
+ \ main.go
+ | function.json
+ | bin*
+ \  UserFunc1.so*
+```
+
+### Other options
+
+If you prefer to deploy your functions to a running instance you can consider
+the following options.
+
+* Put your structured functions in a directory and mount that directory into
+  `/home/site/wwwroot` in the local container.
+
+* For Azure instances, FTP files with `curl` or zip-deploy them with `az
+  functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
+  also need to change the functionapp's appsetting (aka environment variable)
+  `WEBSITES_ENABLE_APP_SERVICE_STORAGE` to `true`.
+
+  The script `test/deploy_function.json` takes a path to a user function which
+  it builds and FTPs to the configured Azure instance.
 
 ## Trigger and watch it
 
@@ -231,7 +281,8 @@ Now your Function is live and ready to handle events. Time to trigger it!
 
 1.  Use a tool like [Postman](https://www.getpostman.com/apps) or `curl` to
     execute a request with the following parameters (in this case for a local
-    instance on port 8080):
+    instance on port 8080). The path after `/api/` is the name of your
+    function.
 
     ```
     HTTP Method: `POST`

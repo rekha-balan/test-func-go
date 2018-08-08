@@ -1,14 +1,14 @@
 ARG RUNTIME_IMAGE=microsoft/azure-functions-base:dev-nightly
-# steps are: 1) build worker, 2) copy worker artifact to runtime image
 
+# build worker then copy to runtime image
 FROM golang:1.10 as golang-env
 WORKDIR /go/src/github.com/Azure/azure-functions-go
 ENV DEP_RELEASE_TAG=v0.5.0
 COPY . .
 RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh \
     && dep ensure -v -vendor-only \
-    && chmod +x ./build.sh \
-    && ./build.sh native
+    && chmod +x ./test/build.sh \
+    && ./test/build.sh native none verbose
 
 # 3. copy built worker and extensions to runtime image
 # ARG instructions used here must be declared before first FROM

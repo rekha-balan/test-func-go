@@ -17,10 +17,11 @@ export -f debug # from helpers.sh, echo to /dev/stderr
 declare -i publish=${1:-0}  # 0: false; 1: true
 declare -i hosted=${2:-0}   # 0: false; 1: true
 declare -i continue=${3:-1} # 0: stop;  1: follow; 2: background
-declare run_image_uri=${4:-"${RUNTIME_IMAGE_REGISTRY}/${RUNTIME_IMAGE_REPO}:${RUNTIME_IMAGE_TAG}"}
-declare instance_name=${5:-${RUNTIME_INSTANCE_NAME}}
-declare group_name="${6:-${AZURE_GROUP_NAME_BASE}-smoker}"
-declare location=${7:-${AZURE_LOCATION_DEFAULT}}
+declare bundle=${4:-"sample"} # "sample" or "usr"
+declare run_image_uri=${5:-"${RUNTIME_IMAGE_REGISTRY}/${RUNTIME_IMAGE_REPO}:${RUNTIME_IMAGE_TAG}"}
+declare instance_name=${6:-${RUNTIME_INSTANCE_NAME}}
+declare group_name="${7:-${AZURE_GROUP_NAME_BASE}-smoker}"
+declare location=${8:-${AZURE_LOCATION_DEFAULT}}
 
 declare sa_name="${BASE_RESOURCE_NAME}storsmoker"
 declare sa_connstr=
@@ -34,7 +35,7 @@ declare cdb_connstr=
 
 ## prepare run image
 echo "building run image [${run_image_uri}]"
-${__dirname}/build.sh $publish
+${__dirname}/build_container.sh $publish $bundle
 ## end prepare run image
 
 ## ensure storage

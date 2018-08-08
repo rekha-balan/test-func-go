@@ -2,3 +2,6 @@ vendor/
 bin/
 *.so
 rpc/protos/azure-functions/
+workers/golang/golang-worker
+usr/*
+!usr/README.md
