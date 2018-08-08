@@ -1,7 +1,7 @@
 {
     "description": {
         "language": "golang",
-        "extension": ".go",
+        "extensions": [".go"],
         "defaultExecutablePath": "bash",
         "defaultWorkerPath": "start.sh"
     }
