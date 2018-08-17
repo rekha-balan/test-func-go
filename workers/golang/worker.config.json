@@ -1,9 +1,8 @@
 {
-    "Description":{
-        "Language":"golang",
-        "Extension":".go",
-        "defaultExecutablePath" : "bash",
-        "DefaultWorkerPath":"start.sh"
-    },
-    "Arguments":[]
+    "description": {
+        "language": "golang",
+        "extensions": [".go"],
+        "defaultExecutablePath": "bash",
+        "defaultWorkerPath": "start.sh"
+    }
 }
