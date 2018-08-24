@@ -22,7 +22,8 @@ COPY . .
 RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh \
     && dep ensure -v -vendor-only \
     && chmod +x ./test/build.sh \
-    && ./test/build.sh native ${bundle} verbose
+    && ./test/build.sh native ${bundle} verbose \
+    && chmod +x ./workers/golang/start.sh
 
 # 3. copy built worker and extensions to runtime image
 # ARG instructions used here must be declared before first FROM
@@ -38,6 +39,7 @@ COPY --from=golang-env \
     /azure-functions-host/workers/golang/
 
 # copy functions to predefined path
+RUN rm -rf /home/site/wwwroot
 COPY --from=golang-env \
     /go/src/github.com/Azure/azure-functions-go/${bundle} \
     /home/site/wwwroot

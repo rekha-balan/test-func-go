@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Directory name for start.sh
-DIR="$(dirname $0)"
+DIR="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
 echo "executing $DIR/golang-worker $@"
 $DIR/golang-worker $@
 # Uncomment the next line and comment the previous one for debugging
