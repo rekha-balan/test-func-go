@@ -1,4 +1,5 @@
-ARG RUNTIME_IMAGE=microsoft/azure-functions-base:dev-nightly
+# --build-arg RUNTIME_IMAGE; functions runtime image
+ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:latest
 
 # build worker then copy to runtime image
 FROM golang:1.10 as golang-env

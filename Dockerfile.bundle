@@ -1,6 +1,6 @@
-# ARG bundle=sample # defined in (2)
-# specify --build-arg bundle='sample' or 'usr' (or any folder in repo)
-ARG RUNTIME_IMAGE=microsoft/azure-functions-base:dev-nightly
+# --build-arg RUNTIME_IMAGE; functions runtime image
+# --build-arg bundle; 'sample' or 'usr' to build functions in dir
+ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:latest
 
 # steps are:
 #   1) build extensions
