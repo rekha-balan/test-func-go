@@ -1,6 +1,6 @@
 # --build-arg RUNTIME_IMAGE; functions runtime image
 # --build-arg bundle; 'sample' or 'usr' to build functions in dir
-ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:latest
+ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:dev
 
 # steps are:
 #   1) build extensions
@@ -11,7 +11,7 @@ ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:latest
 FROM microsoft/dotnet:2.1-sdk AS dotnet-env
 COPY sample/extensions.csproj /extensions/extensions.csproj
 WORKDIR /extensions
-RUN dotnet build extensions.csproj
+RUN dotnet build extensions.csproj -o bin
 
 # 2. build worker with go
 FROM golang:1.10 as golang-env
@@ -30,18 +30,18 @@ RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | s
 FROM ${RUNTIME_IMAGE}
 ARG bundle=sample
 
+RUN rm -rf /home/site/wwwroot
 COPY --from=dotnet-env \
-    /extensions /home/site/wwwroot/bin
+    /extensions/bin/ /home/site/wwwroot/bin/
 
 # copy worker to predefined path
 COPY --from=golang-env \
-    /go/src/github.com/Azure/azure-functions-go/workers/golang \
+    /go/src/github.com/Azure/azure-functions-go/workers/golang/ \
     /azure-functions-host/workers/golang/
 
 # copy functions to predefined path
-RUN rm -rf /home/site/wwwroot
 COPY --from=golang-env \
-    /go/src/github.com/Azure/azure-functions-go/${bundle} \
+    /go/src/github.com/Azure/azure-functions-go/${bundle}/ \
     /home/site/wwwroot
 
 # use predefined env var names to point to worker start script
