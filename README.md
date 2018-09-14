@@ -5,10 +5,10 @@
 This project adds Go support to Azure Functions by implementing a [language
 worker][] for Go. It requires the following:
 
-* Go 1.10+
-* Linux or OS X
-* Docker
-* [Azure CLI](https://github.com/Azure/azure-cli)
+- Go 1.10+
+- Linux or OS X
+- Docker
+- [Azure CLI](https://github.com/Azure/azure-cli)
 
 [language worker]: https://github.com/Azure/azure-functions-host/wiki/Language-Extensibility
 
@@ -68,35 +68,35 @@ the runtime and worker locally without containers.
    details on these connection strings in the following section. The image name
    chosen reflects the defaults in `.env.tpl`.
 
-    ```bash
-    run_image_uri=local/azure-functions-go-with-samples:dev
-    published_port=8080
-    docker container run --rm --detach \
-        --name functions-tester \
-        --publish "${published_port}:80" \
-        --env "AzureWebJobsStorage=$sa_connstr" \
-        --env "ServiceBusConnectionString=$sb_connstr" \
-        --env "EventHubsConnectionString=$eh_connstr" \
-        --env "CosmosDBConnectionString=$cdb_connstr" \
-        "${run_image_uri}"
-    ```
+   ```bash
+   run_image_uri=local/azure-functions-go-with-samples:dev
+   published_port=8080
+   docker container run --rm --detach \
+       --name functions-tester \
+       --publish "${published_port}:80" \
+       --env "AzureWebJobsStorage=$sa_connstr" \
+       --env "ServiceBusConnectionString=$sb_connstr" \
+       --env "EventHubsConnectionString=$eh_connstr" \
+       --env "CosmosDBConnectionString=$cdb_connstr" \
+       "${run_image_uri}"
+   ```
 
 ### Connections to Azure Services
 
 For the Functions runtime to handle their events it must be able to connect to
-Azure services.  This is faciliated by connection strings retrieved by the
-runtime from environment variables. *Connection strings* in Azure are
+Azure services. This is faciliated by connection strings retrieved by the
+runtime from environment variables. _Connection strings_ in Azure are
 collections of semicolon-delimited name-value pairs with details for
-connecting to a service.  The names of env vars to look for are as specified in
+connecting to a service. The names of env vars to look for are as specified in
 `function.json` files; the following names are used in all our samples and
 scripts, and we recommend you don't change them.
 
 For your convenience, CLI commands for getting these strings are also listed.
 
-* AzureWebJobsStorage - `az storage account show-connection-string ...`
-* ServiceBusConnectionString - `az servicebus namespace authorization-rule keys list ...`
-* EventHubsConnectionString - `az eventhubs namespace authorization-rule keys list ...`
-* CosmosDBConnectionString - `az cosmosdb list-keys ...`, formatted into
+- AzureWebJobsStorage - `az storage account show-connection-string ...`
+- ServiceBusConnectionString - `az servicebus namespace authorization-rule keys list ...`
+- EventHubsConnectionString - `az eventhubs namespace authorization-rule keys list ...`
+- CosmosDBConnectionString - `az cosmosdb list-keys ...`, formatted into
   `AccountEndpoint=https://${account_name}.documents.azure.com:443/;AccountKey=${account_key};"`
 
 ### Build and run locally without containers
@@ -107,25 +107,26 @@ For your convenience, CLI commands for getting these strings are also listed.
    that repo.
 1. Set environment variables:
 
-    ```bash
-    FUNCTIONS_WORKER_RUNTIME=golang              # intended target language worker
-    AzureWebJobsScriptRoot=/home/site/wwwroot    # path in container fs to user code
-    AzureWebJobsStorage=                         # Storage account connection string
-    EventHubsConnectionString=                   # Event Hubs namespace connection string
-    ServiceBusConnectionString=                  # Service Bus namespace connection string
-    CosmosDBConnectionString=                    # CosmosDB connection string
-    ```
+   ```bash
+   FUNCTIONS_WORKER_RUNTIME=golang              # intended target language worker
+   AZURE_FUNCTIONS_ENVIRONMENT=Development      # Needed so logs are sent to STDOUT not just to files
+   AzureWebJobsScriptRoot=/home/site/wwwroot    # path in container fs to user code
+   AzureWebJobsStorage=                         # Storage account connection string
+   EventHubsConnectionString=                   # Event Hubs namespace connection string
+   ServiceBusConnectionString=                  # Service Bus namespace connection string
+   CosmosDBConnectionString=                    # CosmosDB connection string
+   ```
 
 1. In `github.com/Azure/azure-functions-host`, modify
    `src/WebJobs.Script.WebHost/appsettings.json` as follows to specify the path
    to the Go worker:
 
-    ```json
-    "langaugeWorkers": {
-      "workersDirectory":
-         "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
-    }
-    ```
+   ```json
+   "langaugeWorkers": {
+     "workersDirectory":
+        "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
+   }
+   ```
 
 # Write and deploy a Go Function
 
@@ -240,8 +241,7 @@ With your Function written, you're ready to package and deploy it to a Go Functi
 During preview the recommended pattern for deployment is to build an image with
 runtime, Golang worker, and user functions included. To facilitate this we've
 provided a `usr` directory where you can put properly structured function
-files, and then run `make local-instance-with-usr` (or `make
-azure-instance-with-usr`) to automatically build and include your functions in
+files, and then run `make local-instance-with-usr` (or `make azure-instance-with-usr`) to automatically build and include your functions in
 the image.
 
 Each function should be in a directory bearing its intended name. Within that
@@ -249,7 +249,7 @@ directory there should be a main.go and function.json file. On build, a file
 `bin/${function_name}.so` will also be added to the directory. All three files
 (even the source in main.go) are used by the runtime.
 
-The structure of a function is as follows (paths marked * are added by builder):
+The structure of a function is as follows (paths marked \* are added by builder):
 
 ```
 | UserFunc1
@@ -264,11 +264,10 @@ The structure of a function is as follows (paths marked * are added by builder):
 If you prefer to deploy your functions to a running instance you can consider
 the following options.
 
-* Put your structured functions in a directory and mount that directory into
+- Put your structured functions in a directory and mount that directory into
   `/home/site/wwwroot` in the local container.
 
-* For Azure instances, FTP files with `curl` or zip-deploy them with `az
-  functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
+- For Azure instances, FTP files with `curl` or zip-deploy them with `az functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
   also need to change the functionapp's appsetting (aka environment variable)
   `WEBSITES_ENABLE_APP_SERVICE_STORAGE` to `true`.
 

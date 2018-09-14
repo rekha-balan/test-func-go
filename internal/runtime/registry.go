@@ -10,7 +10,7 @@ import (
 	"reflect"
 
 	"github.com/Azure/azure-functions-go/internal/rpc"
-	logrus "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Registry contains all information about user functions and how to execute them
@@ -27,7 +27,7 @@ func NewRegistry() *Registry {
 
 // LoadFunc populates information about the func from the compiled plugin and from parsing the source code
 func (r Registry) LoadFunc(req *rpc.FunctionLoadRequest) error {
-	logrus.Debugf("received function load request: %v", req)
+	log.Debugf("received function load request: %v", req)
 
 	f, err := loadFuncFromPlugin(req.Metadata)
 	if err != nil {
@@ -42,7 +42,7 @@ func (r Registry) LoadFunc(req *rpc.FunctionLoadRequest) error {
 	f.in = ins
 	f.out = outs
 
-	logrus.Debugf("function: %v", f)
+	log.Debugf("function: %v", f)
 	r.funcs[req.FunctionId] = f
 
 	return nil
@@ -51,7 +51,7 @@ func (r Registry) LoadFunc(req *rpc.FunctionLoadRequest) error {
 // ExecuteFunc takes an InvocationRequest and executes the function with corresponding function ID
 func (r Registry) ExecuteFunc(req *rpc.InvocationRequest, eventStream rpc.FunctionRpc_EventStreamClient) (response *rpc.InvocationResponse) {
 
-	logrus.Debugf("\n\n\nInvocation Request: %v", req)
+	log.Debugf("\n\n\nInvocation Request: %v", req)
 
 	status := rpc.StatusResult_Success
 
@@ -64,7 +64,7 @@ func (r Registry) ExecuteFunc(req *rpc.InvocationRequest, eventStream rpc.Functi
 	f, ok := r.funcs[req.FunctionId]
 
 	if !ok {
-		logrus.Debugf("function with functionID %v not loaded", req.FunctionId)
+		log.Debugf("function with functionID %v not loaded", req.FunctionId)
 		ir.Result.Status = rpc.StatusResult_Failure
 		return ir
 	}
@@ -78,7 +78,7 @@ func (r Registry) ExecuteFunc(req *rpc.InvocationRequest, eventStream rpc.Functi
 	params := make([]reflect.Value, len(f.in))
 	for _, v := range f.in {
 		isIntf := v.Type.Kind() == reflect.Interface
-		logrus.Debugf("Kind is %v  and is intf:%t and type is %v", v.Type.Kind(), isIntf, v.Type)
+		log.Debugf("Kind is %v  and is intf:%t and type is %v", v.Type.Kind(), isIntf, v.Type)
 		ctx := &funcContext{
 			Context:      context.Background(),
 			functionID:   req.FunctionId,
@@ -88,7 +88,7 @@ func (r Registry) ExecuteFunc(req *rpc.InvocationRequest, eventStream rpc.Functi
 		ctxv := reflect.ValueOf(ctx).Elem()
 
 		if v.Type.Kind() == reflect.Interface && ctxv.Type().Implements(v.Type) {
-			logrus.Debug("created context")
+			log.Debug("created context")
 			params[v.Position] = ctxv
 		} else {
 			params[v.Position] = args[v.Name]
@@ -103,7 +103,7 @@ func (r Registry) ExecuteFunc(req *rpc.InvocationRequest, eventStream rpc.Functi
 	o, rv, s, err := ToProto(output, f.out)
 
 	if err != nil {
-		logrus.Debugf("cannot get output data from result %v", err)
+		log.Debugf("cannot get output data from result %v", err)
 		if err != nil {
 			ir.Result.Status = rpc.StatusResult_Failure
 			return ir
@@ -197,9 +197,9 @@ func loadInOut(metadata *rpc.RpcFunctionMetadata, funcType reflect.Type) (map[st
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.FuncDecl:
-			logrus.Debugf("found function: %v", x.Name.Name)
+			log.Debugf("found function: %v", x.Name.Name)
 			if x.Name.Name != metadata.EntryPoint {
-				logrus.Debugf("not function entrypoint, moving on...")
+				log.Debugf("not function entrypoint, moving on...")
 
 				// not the entrypoint, go further into the AST
 				return true
@@ -234,7 +234,7 @@ func extractFuncFields(fl *ast.FieldList, bindings map[string]*rpc.BindingInfo, 
 	for i, p := range fl.List {
 		t := fi(i)
 		for _, n := range p.Names {
-			logrus.Debugf("Found parameter: %s with type: %s", n, t.String())
+			log.Debugf("Found parameter: %s with type: %s", n, t.String())
 
 			fields[n.Name] = &funcField{
 				Name:     n.Name,

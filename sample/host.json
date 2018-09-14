@@ -1,12 +1,15 @@
 {
-  "eventHub": {
-    "maxBatchSize": 10,
-    "prefetchCount": 256,
-    "batchCheckpointFrequency": 1
-  },
-  "serviceBus": {
-    "maxConcurrentCalls": 10,
-    "prefetchCount": 100,
-    "autoRenewTimeout": "00:05:00"
+  "version": "2.0",
+  "extensions": {
+    "eventHub": {
+      "maxBatchSize": 10,
+      "prefetchCount": 256,
+      "batchCheckpointFrequency": 1
+    },
+    "serviceBus": {
+      "maxConcurrentCalls": 10,
+      "prefetchCount": 100,
+      "autoRenewTimeout": "00:05:00"
+    }
   }
 }

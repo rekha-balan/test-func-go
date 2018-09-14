@@ -48,7 +48,23 @@ func init() {
 
 	if flagDebug {
 		log.SetLevel(log.DebugLevel)
+		log.SetFormatter(prefixFormatter{
+			formatter: &log.TextFormatter{},
+		})
 	}
+}
+
+type prefixFormatter struct {
+	formatter *log.TextFormatter
+}
+
+func (p prefixFormatter) Format(entry *log.Entry) ([]byte, error) {
+	workerLoggerKeyPrefix := []byte("LanguageWorkerConsoleLog: ")
+	f, err := p.formatter.Format(entry)
+	if err != nil {
+		return f, err
+	}
+	return append(workerLoggerKeyPrefix, f...), nil
 }
 
 func startWorker(args []string) {

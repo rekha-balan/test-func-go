@@ -64,7 +64,7 @@ function build_function () {
                 -w /go/src/${function_name} \
                 golang:1.10 \
                 /bin/bash -c "go build -buildmode=plugin \
-                    -o bin/${func}.so main.go"
+                    -o bin/${function_name}.so main.go"
         fi
     fi
 
