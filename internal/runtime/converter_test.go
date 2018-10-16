@@ -9,9 +9,11 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Azure/azure-functions-go/azfunc"
 	"github.com/Azure/azure-functions-go/internal/rpc"
+	"github.com/go-test/deep"
 	"github.com/golang/protobuf/jsonpb"
 )
 
@@ -161,6 +163,8 @@ func TestConvertToTypeValue_Timer(t *testing.T) {
 	}
 }
 
+var emptyLocation = time.FixedZone("+0000", 0)
+
 func TestConvertToTypeValue_Blob(t *testing.T) {
 	ir := loadInvocationRequest(t, "blobTrigger_InvocationRequest.json")
 
@@ -199,14 +203,14 @@ func TestConvertToTypeValue_Blob(t *testing.T) {
 					ContentMD5:   "LRhNxuDmIGXy0KzNoxj9bg==",
 					ContentType:  "text/plain",
 					ETag:         "\"0x8D5EC8302DB81F9\"",
-					LastModified: "2018-07-18T07:49:37+00:00",
+					LastModified: time.Date(2018, time.July, 18, 7, 49, 37, 0, emptyLocation),
 					Length:       18,
 				},
 			}
 
-			if got, want := v, expectedBlob; got != want {
-				t.Logf("got:  %v\nwant: %v", got, want)
-				t.Fail()
+			got, want := v, expectedBlob
+			if diff := deep.Equal(got, want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -245,16 +249,16 @@ func TestConvertToTypeValue_QueueMsg(t *testing.T) {
 			expectedQueueMsg := azfunc.QueueMsg{
 				ID:           "38c00d86-c30c-4a48-aff5-deafb4b273e4",
 				DequeueCount: 1,
-				Expiration:   "2018-07-25T08:15:08+00:00",
-				Insertion:    "2018-07-18T08:15:08+00:00",
-				NextVisible:  "2018-07-18T08:25:15+00:00",
+				Expiration:   time.Date(2018, time.July, 25, 8, 15, 8, 0, emptyLocation),
+				Insertion:    time.Date(2018, time.July, 18, 8, 15, 8, 0, emptyLocation),
+				NextVisible:  time.Date(2018, time.July, 18, 8, 25, 15, 0, emptyLocation),
 				PopReceipt:   "AgAAAAMAAAAAAAAASsWZ2nAe1AE=",
 				Text:         "test queue msg",
 			}
 
-			if got, want := v, expectedQueueMsg; got != want {
-				t.Logf("got:  %v\nwant: %v", got, want)
-				t.Fail()
+			got, want := v, expectedQueueMsg
+			if diff := deep.Equal(got, want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -294,17 +298,17 @@ func TestConvertToTypeValue_ServiceBusMsg(t *testing.T) {
 				Data:            "Message 1",
 				MessageID:       "429c66a736a94a2e8c6e2783e568d460",
 				DeliveryCount:   7,
-				ExpiresAtUtc:    "2018-07-31T23:54:18.288Z",
-				EnqueuedTimeUtc: "2018-07-30T23:54:18.288Z",
+				ExpiresAtUtc:    time.Date(2018, time.July, 31, 23, 54, 18, 288000000, time.UTC),
+				EnqueuedTimeUtc: time.Date(2018, 7, 30, 23, 54, 18, 288000000, time.UTC),
 				SequenceNumber:  281474976710657,
 				UserProperties: map[string]interface{}{
 					"x-opt-enqueue-sequence-number": float64(0),
 				},
 			}
 
-			if got, want := v, expectedQueueMsg; !reflect.DeepEqual(got, want) {
-				t.Logf("got:  %v\nwant: %v", got, want)
-				t.Fail()
+			got, want := v, expectedQueueMsg
+			if diff := deep.Equal(got, want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -358,7 +362,7 @@ func TestConvertToTypeValue_EventGridEvent(t *testing.T) {
 			expected := azfunc.EventGridEvent{
 				Data:            data,
 				DataVersion:     "",
-				EventTime:       "2018-07-04T01:43:58.6171715Z",
+				EventTime:       time.Date(2018, 7, 4, 1, 43, 58, 617171500, time.UTC),
 				EventType:       "Microsoft.Storage.BlobCreated",
 				ID:              "71fd4516-701e-005b-0b38-135eb80633b3",
 				MetadataVersion: "1",
@@ -366,9 +370,9 @@ func TestConvertToTypeValue_EventGridEvent(t *testing.T) {
 				Topic:           "/subscriptions/7127e532-e730-40dd-acda-0ca1105c1e55/resourceGroups/valddFunctionGo/providers/Microsoft.Storage/storageAccounts/vladdbblobstorage",
 			}
 
-			if got, want := v, expected; !reflect.DeepEqual(got, want) {
-				t.Logf("got:  %v\nwant: %v", got, want)
-				t.Fail()
+			got, want := v, expected
+			if diff := deep.Equal(got, want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

@@ -111,7 +111,7 @@ func encodeProto(v reflect.Value) (*rpc.TypedData, error) {
 		if v.IsNil() {
 			return &rpc.TypedData{}, nil
 		}
-		log.Debugf("encoding pointer %s", v.Type().Name)
+		log.Debugf("encoding pointer %s", v.Type().Name())
 		v = v.Elem()
 	}
 
@@ -157,11 +157,11 @@ func convertToTypeValue(pt reflect.Type, data *rpc.TypedData, tm map[string]*rpc
 	v := pv.Elem()
 	c := 0
 	log.Debugf("Converting to type %s", t)
-	log.Debugf("invocation metadata fields: %v", t, tm)
+	log.Debugf("invocation metadata fields: %v, %v", t, tm)
 
 	for i := 0; t.Kind() == reflect.Struct && i < v.NumField(); i++ {
 		tag := t.Field(i).Tag.Get("json")
-		log.Debugf("Decoding field: %s, tag: %s", t.Field(i), tag)
+		log.Debugf("Decoding field: %s, tag: %s", t.Field(i).Name, tag)
 
 		var td *rpc.TypedData
 

@@ -2,6 +2,7 @@ package azfunc
 
 import (
 	"context"
+	"time"
 )
 
 // Context contains the runtime context of the function
@@ -31,20 +32,20 @@ type Timer struct {
 
 // ScheduleStatus contains the schedule for a Timer.
 type ScheduleStatus struct {
-	Next        string `json:"Next"`
-	Last        string `json:"Last"`
-	LastUpdated string `json:"LastUpdated"`
+	Next        time.Time `json:"Next"`
+	Last        time.Time `json:"Last"`
+	LastUpdated time.Time `json:"LastUpdated"`
 }
 
 // QueueMsg represents an Azure queue message.
 type QueueMsg struct {
-	Text         string `json:"azfuncdata"`
-	ID           string `json:"Id"`
-	Insertion    string `json:"InsertionTime"`
-	Expiration   string `json:"ExpirationTime"`
-	PopReceipt   string `json:"PopReceipt"`
-	NextVisible  string `json:"NextVisibleTime"`
-	DequeueCount int    `json:"DequeueCount"`
+	Text         string    `json:"azfuncdata"`
+	ID           string    `json:"Id"`
+	Insertion    time.Time `json:"InsertionTime"`
+	Expiration   time.Time `json:"ExpirationTime"`
+	PopReceipt   string    `json:"PopReceipt"`
+	NextVisible  time.Time `json:"NextVisibleTime"`
+	DequeueCount int       `json:"DequeueCount"`
 }
 
 // Blob contains the data from a blob as string.
@@ -57,11 +58,11 @@ type Blob struct {
 
 // BlobProperties contains metadata about a blob.
 type BlobProperties struct {
-	Length       int    `json:"Length"`
-	ContentMD5   string `json:"ContentMD5"`
-	ContentType  string `json:"ContentType"`
-	ETag         string `json:"ETag"`
-	LastModified string `json:"LastModified"`
+	Length       int       `json:"Length"`
+	ContentMD5   string    `json:"ContentMD5"`
+	ContentType  string    `json:"ContentType"`
+	ETag         string    `json:"ETag"`
+	LastModified time.Time `json:"LastModified"`
 }
 
 //EventGridEvent represents properties of an event published to an Event Grid topic.
@@ -77,7 +78,7 @@ type EventGridEvent struct {
 	// EventType - The type of the event that occurred.
 	EventType string `json:"eventType"`
 	// EventTime - The time (in UTC) the event was generated.
-	EventTime string `json:"eventTime"`
+	EventTime time.Time `json:"eventTime"`
 	// MetadataVersion - The schema version of the event metadata.
 	MetadataVersion string `json:"metadataVersion"`
 	// DataVersion - The schema version of the data object.
@@ -90,7 +91,7 @@ type EventHubEvent struct {
 	PartitionKey    *string                `json:"PartitionKey"`
 	SequenceNumber  int                    `json:"SequenceNumber"`
 	Offset          int                    `json:"Offset"`
-	EnqueuedTimeUtc string                 `json:"EnqueuedTimeUtc"`
+	EnqueuedTimeUtc time.Time              `json:"EnqueuedTimeUtc"`
 	Properties      map[string]interface{} `json:"Properties"`
 }
 
@@ -100,8 +101,8 @@ type SBMsg struct {
 	MessageID        string                 `json:"MessageId"`
 	DeliveryCount    uint32                 `json:"DeliveryCount"`
 	SequenceNumber   int64                  `json:"SequenceNumber"`
-	ExpiresAtUtc     string                 `json:"ExpiresAtUtc"`
-	EnqueuedTimeUtc  string                 `json:"EnqueuedTimeUtc"`
+	ExpiresAtUtc     time.Time              `json:"ExpiresAtUtc"`
+	EnqueuedTimeUtc  time.Time              `json:"EnqueuedTimeUtc"`
 	ReplyTo          *string                `json:"ReplyTo"`
 	To               *string                `json:"To"`
 	CorrelationID    *string                `json:"CorrelationId"`
