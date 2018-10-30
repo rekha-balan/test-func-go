@@ -166,7 +166,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
     // Run runs this Azure Function if/because it is specified in `function.json` as
     // the entryPoint. Fields of the function's parameters are also bound to
     // incoming and outgoing event properties as specified in `function.json`.
-    func Run(ctx azfunc.Context, req *http.Request) (User, error) {
+    func Run(ctx azfunc.Context, req *http.Request) (*User, error) {
 
         // additional properties are bound to ctx by Azure Functions
         ctx.Log(azfunc.LogInformation,"function invoked: function %v, invocation %v", ctx.FunctionID(), ctx.InvocationID())
@@ -180,7 +180,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
         var err error
         err = json.Unmarshal(body, &data)
         if err != nil {
-            return nil, fmt.Errorf("failed to unmarshal JSON: %s\n", err)
+            return nil, fmt.Errorf("failed to unmarshal JSON: %v\n", err)
         }
 
         // and to get query param values:
@@ -291,8 +291,8 @@ Now your Function is live and ready to handle events. Time to trigger it!
     ```
 
     ```bash
-    declare PORT=8080 PERSON_NAME=world
-    curl -L "http://localhost:${PORT}/api/HttpTrigger?name=${PERSON_NAME}" \
+    declare PORT=8080 FUNCTION_NAME=HttpTrigger PERSON_NAME=world 
+    curl -L "http://localhost:${PORT}/api/${FUNCTION_NAME}?name=${PERSON_NAME}" \
         --data '{ "greeting": "How are you?" }' \
         --header 'Content-Type: application/json' \
     ```
