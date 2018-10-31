@@ -20,13 +20,19 @@ name_available=$(az storage account check-name \
 debug "storage name $account_name available? $name_available"
 
 debug "creating storage account $account_name"
-account_id=$(az storage account create \
+account_id=$(az storage account show \
     --name $account_name \
     --resource-group $group_name \
-    --location $location \
-    --sku 'Standard_LRS' \
     --query id --output tsv)
-debug "created storage account: $account_id"
+if [[ -z $account_id ]]; then
+    account_id=$(az storage account create \
+        --name $account_name \
+        --resource-group $group_name \
+        --location $location \
+        --sku 'Standard_LRS' \
+        --query id --output tsv)
+fi
+debug "ensured storage account: $account_id"
 
 debug "getting account key"
 key=$(az storage account keys list \

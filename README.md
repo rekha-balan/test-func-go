@@ -241,7 +241,8 @@ With your Function written, you're ready to package and deploy it to a Go Functi
 During preview the recommended pattern for deployment is to build an image with
 runtime, Golang worker, and user functions included. To facilitate this we've
 provided a `usr` directory where you can put properly structured function
-files, and then run `make local-instance-with-usr` (or `make azure-instance-with-usr`) to automatically build and include your functions in
+files, and then run `make local-instance-with-usr` (or `make
+azure-instance-with-usr`) to automatically build and include your functions in
 the image.
 
 Each function should be in a directory bearing its intended name. Within that
@@ -267,7 +268,8 @@ the following options.
 - Put your structured functions in a directory and mount that directory into
   `/home/site/wwwroot` in the local container.
 
-- For Azure instances, FTP files with `curl` or zip-deploy them with `az functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
+- For Azure instances, FTP files with `curl` or zip-deploy them with `az
+  functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
   also need to change the functionapp's appsetting (aka environment variable)
   `WEBSITES_ENABLE_APP_SERVICE_STORAGE` to `true`.
 
@@ -321,7 +323,8 @@ Now your Function is live and ready to handle events. Time to trigger it!
   into the built binary.
 - Structs in the function signature are initialized based on properties in the
   incoming event and specifications in function.json. In the example signature
-  of `func Run(ctx azfunc.Context, req *http.Request) (User, error)`; `ctx azfunc.Context`, `req *http.Request` and `User` are automatically bound to
+  of `func Run(ctx azfunc.Context, req *http.Request) (User, error)`; `ctx
+  azfunc.Context`, `req *http.Request` and `User` are automatically bound to
   incoming and outgoing message properties. Properties received from the GRPC
   channel are bound to properties on the Go structs, and any Go struct with the
   named properties can be used; that is, there's nothing special about the

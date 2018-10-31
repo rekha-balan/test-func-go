@@ -9,7 +9,7 @@ account_name=$1
 group_name=$2
 location=$3
 
-db_name="Documents"
+db_name="documents"
 collection_names=(reports tasks)
 
 group_id=$(ensure_group $group_name)
@@ -20,13 +20,19 @@ name_available=$(az cosmosdb check-name-exists \
     --output tsv)
 debug "cosmos db account name $account_name available? $name_available"
 
-debug "creating cosmosdb account $account_name"
-account_id=$(az cosmosdb create \
+debug "ensuring cosmosdb account $account_name"
+account_id=$(az cosmosdb show \
     --name $account_name \
     --resource-group $group_name \
-    --kind 'GlobalDocumentDB' \
     --query id --output tsv)
-debug "created cosmosdb account: $account_id"
+if [[ -z $account_id ]]; then
+    account_id=$(az cosmosdb create \
+        --name $account_name \
+        --resource-group $group_name \
+        --kind 'GlobalDocumentDB' \
+        --query id --output tsv)
+fi
+debug "ensured cosmosdb account: $account_id"
 
 debug "getting account key and making connstr"
 account_key=$(az cosmosdb list-keys \

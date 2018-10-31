@@ -52,3 +52,8 @@ az functionapp config appsettings set \
     --ids $functionapp_id \
     --settings $settings
 
+az webapp log config \
+  --ids $functionapp_id \
+  --docker-container-logging filesystem \
+  --application-logging true \
+  --level information

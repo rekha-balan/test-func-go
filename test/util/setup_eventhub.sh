@@ -19,14 +19,20 @@ name_available=$(az eventhubs namespace exists \
     --query nameAvailable --output tsv)
 debug "event hub namespace name $namespace_name available? $name_available"
 
-debug "creating event hub namespace $namespace_name"
-namespace_id=$(az eventhubs namespace create \
+debug "ensuring event hub namespace $namespace_name"
+namespace_id=$(az eventhubs namespace show \
     --name $namespace_name \
     --resource-group $group_name \
-    --location $location \
-    --sku 'Standard' \
     --query id --output tsv)
-debug "created event hub namespace: $namespace_id"
+if [[ -z $namespace_id ]]; then
+    namespace_id=$(az eventhubs namespace create \
+        --name $namespace_name \
+        --resource-group $group_name \
+        --location $location \
+        --sku 'Standard' \
+        --query id --output tsv)
+fi
+debug "ensured event hub namespace: $namespace_id"
 
 debug "getting namespace default SAS policy"
 policy_name=$(az eventhubs namespace authorization-rule list \
@@ -41,14 +47,21 @@ connstr=$(az eventhubs namespace authorization-rule keys list \
     --name $policy_name \
     --query "primaryConnectionString" -o tsv)
 
-debug "creating hubs"
+debug "ensuring hubs"
 for eventhub_name in ${eventhub_names[@]}; do
-    hub_name=$(az eventhubs eventhub create \
+    hub_name=$(az eventhubs eventhub show \
         --name $eventhub_name \
         --namespace-name $namespace_name \
         --resource-group $group_name \
         --output tsv --query name)
-    debug "created hub: $hub_name"
+    if [ -z $hub_name ]; then
+        hub_name=$(az eventhubs eventhub create \
+            --name $eventhub_name \
+            --namespace-name $namespace_name \
+            --resource-group $group_name \
+            --output tsv --query name)
+    fi
+    debug "ensured hub: $hub_name"
 done
 
 echo $connstr

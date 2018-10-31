@@ -19,14 +19,20 @@ name_available=$(az servicebus namespace exists \
     --query nameAvailable --output tsv)
 debug "service bus namespace name $namespace_name available? $name_available"
 
-debug "creating service bus namespace $namespace_name"
-namespace_id=$(az servicebus namespace create \
+debug "ensuring service bus namespace $namespace_name"
+namespace_id=$(az servicebus namespace show \
     --name $namespace_name \
     --resource-group $group_name \
-    --location $location \
-    --sku 'Standard' \
     --query id --output tsv)
-debug "created service bus namespace: $namespace_id"
+if [[ -z $namespace_id ]]; then
+    namespace_id=$(az servicebus namespace create \
+        --name $namespace_name \
+        --resource-group $group_name \
+        --location $location \
+        --sku 'Standard' \
+        --query id --output tsv)
+fi
+debug "ensured service bus namespace: $namespace_id"
 
 debug "getting namespace default SAS Policy connection string"
 default_policy_name=$(az servicebus namespace authorization-rule list \
@@ -39,14 +45,21 @@ connstr=$(az servicebus namespace authorization-rule keys list \
     --name $default_policy_name \
     --query "primaryConnectionString" -o tsv)
 
-debug "creating queues"
+debug "ensuring queues"
 for queue_name in ${queue_names[@]}; do
-    queue_name=$(az servicebus queue create \
+    queue_name=$(az servicebus queue show \
         --name $queue_name \
         --namespace-name $namespace_name \
         --resource-group $group_name \
         --output tsv --query name)
-    debug "created queue $queue_name"
+    if [[ -z $queue_name ]]; then
+        queue_name=$(az servicebus queue create \
+            --name $queue_name \
+            --namespace-name $namespace_name \
+            --resource-group $group_name \
+            --output tsv --query name)
+    fi
+    debug "ensured queue $queue_name"
 done
 
 echo $connstr
