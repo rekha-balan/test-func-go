@@ -9,8 +9,8 @@ account_name=$1
 group_name=$2
 location=$3
 
-db_name="documents"
-collection_names=(reports tasks)
+db_name="Documents"
+collection_names=(reports tasks leases)
 
 group_id=$(ensure_group $group_name)
 debug "group_id: $group_id"
