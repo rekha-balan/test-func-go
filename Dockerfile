@@ -22,3 +22,6 @@ COPY --from=golang-env \
 
 # use predefined env var names to point to worker start script
 ENV workers:golang:path /azure-functions-host/workers/golang/start.sh
+# remove the following line to disable console logging. To 
+# configure logging, see the host.json file.
+ENV AzureFunctionsJobHost__Logging__Console__IsEnabled=true

@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.com/Azure/azure-functions-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go)
 
 This project adds Go support to Azure Functions by implementing a [language
+
 worker][] for Go. It requires the following:
 
 - Go 1.10+
@@ -241,8 +242,7 @@ With your Function written, you're ready to package and deploy it to a Go Functi
 During preview the recommended pattern for deployment is to build an image with
 runtime, Golang worker, and user functions included. To facilitate this we've
 provided a `usr` directory where you can put properly structured function
-files, and then run `make local-instance-with-usr` (or `make
-azure-instance-with-usr`) to automatically build and include your functions in
+files, and then run `make local-instance-with-usr` (or `make azure-instance-with-usr`) to automatically build and include your functions in
 the image.
 
 Each function should be in a directory bearing its intended name. Within that
@@ -268,8 +268,7 @@ the following options.
 - Put your structured functions in a directory and mount that directory into
   `/home/site/wwwroot` in the local container.
 
-- For Azure instances, FTP files with `curl` or zip-deploy them with `az
-  functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
+- For Azure instances, FTP files with `curl` or zip-deploy them with `az functionapp deployment source config-zip --src zippedfunc.zip ...`. You'll
   also need to change the functionapp's appsetting (aka environment variable)
   `WEBSITES_ENABLE_APP_SERVICE_STORAGE` to `true`.
 
@@ -293,7 +292,7 @@ Now your Function is live and ready to handle events. Time to trigger it!
     ```
 
     ```bash
-    declare PORT=8080 FUNCTION_NAME=HttpTrigger PERSON_NAME=world 
+    declare PORT=8080 FUNCTION_NAME=HttpTrigger PERSON_NAME=world
     curl -L "http://localhost:${PORT}/api/${FUNCTION_NAME}?name=${PERSON_NAME}" \
         --data '{ "greeting": "How are you?" }' \
         --header 'Content-Type: application/json' \
@@ -323,8 +322,7 @@ Now your Function is live and ready to handle events. Time to trigger it!
   into the built binary.
 - Structs in the function signature are initialized based on properties in the
   incoming event and specifications in function.json. In the example signature
-  of `func Run(ctx azfunc.Context, req *http.Request) (User, error)`; `ctx
-  azfunc.Context`, `req *http.Request` and `User` are automatically bound to
+  of `func Run(ctx azfunc.Context, req *http.Request) (User, error)`; `ctx azfunc.Context`, `req *http.Request` and `User` are automatically bound to
   incoming and outgoing message properties. Properties received from the GRPC
   channel are bound to properties on the Go structs, and any Go struct with the
   named properties can be used; that is, there's nothing special about the
@@ -340,6 +338,10 @@ Now your Function is live and ready to handle events. Time to trigger it!
   signal that the function execution failed for whatever reason.
 - Having pointer types is preferred, but you can also have parameters and
   return values as non-pointer types for your functions.
+- Logging to console is enabled by default for logs from functions. To enable logs
+  from the worker have a look in the `host.json` file. To disable logging to console
+  entirely, set the `AzureFunctionsJobHost__Logging__Console__IsEnabled` to `false` in
+  the dockerfiles.
 
 ## Disclaimer
 
