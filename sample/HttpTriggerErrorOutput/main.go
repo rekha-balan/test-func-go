@@ -37,7 +37,7 @@ func Run(ctx azfunc.Context, req *http.Request) (resp *http.Response, err error)
 	if name == "" {
 		resp.StatusCode = 400
 		resp.Status = "400 BAD REQUEST"
-		err = fmt.Errorf("Missing require parameter: name")
+		err = fmt.Errorf("Missing required parameter: name")
 	}
 
 	resp.Header.Add("customHeader", "azfuncHello")

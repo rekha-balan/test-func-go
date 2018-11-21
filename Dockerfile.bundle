@@ -1,6 +1,6 @@
 # --build-arg RUNTIME_IMAGE; functions runtime image
 # --build-arg bundle; 'sample' or 'usr' to build functions in dir
-ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:dev
+ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:2.0
 
 # steps are:
 #   1) build extensions
@@ -46,3 +46,5 @@ COPY --from=golang-env \
 
 # use predefined env var names to point to worker start script
 ENV workers:golang:path /azure-functions-host/workers/golang/start.sh
+# Uncomment the following line to get worker and function logs
+# ENV AZURE_FUNCTIONS_ENVIRONMENT development
