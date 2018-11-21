@@ -14,7 +14,7 @@ WORKDIR /extensions
 RUN dotnet build extensions.csproj -o bin
 
 # 2. build worker with go
-FROM golang:1.10 as golang-env
+FROM golang:1.11 as golang-env
 ARG bundle=sample
 WORKDIR /go/src/github.com/Azure/azure-functions-go
 ENV DEP_RELEASE_TAG=v0.5.0

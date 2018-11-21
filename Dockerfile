@@ -2,7 +2,7 @@
 ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:2.0
 
 # build worker then copy to runtime image
-FROM golang:1.10 as golang-env
+FROM golang:1.11 as golang-env
 WORKDIR /go/src/github.com/Azure/azure-functions-go
 ENV DEP_RELEASE_TAG=v0.5.0
 COPY . .
