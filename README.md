@@ -1,6 +1,6 @@
 # Azure Functions for Go
 
-[![Build Status](https://travis-ci.com/Azure/azure-functions-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go)
+[![Build Status](https://travis-ci.com/vladbarosan/test-func-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/vladbarosan/test-func-go)
 
 This project adds Go support to Azure Functions by implementing a [language worker][] for Go. It requires the following:
 
@@ -123,7 +123,7 @@ For your convenience, CLI commands for getting these strings are also listed.
    ```json
    "langaugeWorkers": {
      "workersDirectory":
-        "/home/functions-user/go/src/github.com/Azure/azure-functions-go/workers"
+        "/home/functions-user/go/src/github.com/vladbarosan/test-func-go/workers"
    }
    ```
 
@@ -142,7 +142,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
 > on the programming model.
 
 [the httptrigger sample]: ./sample/HttpTrigger
-[the wiki]: https://github.com/Azure/azure-functions-go/wiki/Programming-Model
+[the wiki]: https://github.com/vladbarosan/test-func-go/wiki/Programming-Model
 
 ## Write a Go Function
 
@@ -159,7 +159,7 @@ an HttpTrigger, as demonstrated in [the HttpTrigger sample][].
         "io/ioutil"
         "net/http"
 
-        "github.com/Azure/azure-functions-go/azfunc"
+        "github.com/vladbarosan/test-func-go/azfunc"
     )
 
     // Run runs this Azure Function if/because it is specified in `function.json` as

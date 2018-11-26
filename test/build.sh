@@ -34,8 +34,8 @@ else
     echo "building worker..."
     # mount pwd into container and build there
     docker run -it --rm \
-        -v $(pwd):/go/src/github.com/Azure/azure-functions-go \
-        -w /go/src/github.com/Azure/azure-functions-go \
+        -v $(pwd):/go/src/github.com/vladbarosan/test-func-go \
+        -w /go/src/github.com/vladbarosan/test-func-go \
         golang:1.10 \
         /bin/bash -c "go build -o workers/golang/golang-worker && \
                       chmod +rx workers/golang/golang-worker"
@@ -59,7 +59,7 @@ function build_function () {
                 "${function_path}/main.go"
         else
             docker run -it --rm \
-                -v "${__root}":/go/src/github.com/Azure/azure-functions-go \
+                -v "${__root}":/go/src/github.com/vladbarosan/test-func-go \
                 -v "${function_path}":/go/src/${function_name} \
                 -w /go/src/${function_name} \
                 golang:1.10 \

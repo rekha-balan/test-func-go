@@ -1,1 +1,1 @@
-module github.com/Azure/azure-functions-go/sample/HttpTrigger
+module github.com/vladbarosan/test-func-go/sample/HttpTrigger

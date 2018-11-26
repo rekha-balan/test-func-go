@@ -16,7 +16,7 @@ RUN dotnet build extensions.csproj -o bin
 # 2. build worker with go
 FROM golang:1.11 as golang-env
 ARG bundle=sample
-WORKDIR /go/src/github.com/Azure/azure-functions-go
+WORKDIR /go/src/github.com/vladbarosan/test-func-go
 ENV DEP_RELEASE_TAG=v0.5.0
 COPY . .
 RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh \
@@ -36,12 +36,12 @@ COPY --from=dotnet-env \
 
 # copy worker to predefined path
 COPY --from=golang-env \
-    /go/src/github.com/Azure/azure-functions-go/workers/golang/ \
+    /go/src/github.com/vladbarosan/test-func-go/workers/golang/ \
     /azure-functions-host/workers/golang/
 
 # copy functions to predefined path
 COPY --from=golang-env \
-    /go/src/github.com/Azure/azure-functions-go/${bundle}/ \
+    /go/src/github.com/vladbarosan/test-func-go/${bundle}/ \
     /home/site/wwwroot
 
 # use predefined env var names to point to worker start script

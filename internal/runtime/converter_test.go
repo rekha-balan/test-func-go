@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/azure-functions-go/azfunc"
-	"github.com/Azure/azure-functions-go/internal/rpc"
+	"github.com/vladbarosan/test-func-go/azfunc"
+	"github.com/vladbarosan/test-func-go/internal/rpc"
 	"github.com/go-test/deep"
 	"github.com/golang/protobuf/jsonpb"
 )

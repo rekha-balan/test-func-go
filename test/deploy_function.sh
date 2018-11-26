@@ -39,9 +39,9 @@ docker run -it --rm \
     -w /go/src/${function_dir} \
     golang:1.10 \
     /bin/bash -c " \
-    mkdir -p /go/src/github.com/Azure/azure-functions-go; \
-    git clone https://${GH_USER}:${GH_TOKEN}@github.com/Azure/azure-functions-go \
-        /go/src/github.com/Azure/azure-functions-go;
+    mkdir -p /go/src/github.com/vladbarosan/test-func-go; \
+    git clone https://${GH_USER}:${GH_TOKEN}@github.com/vladbarosan/test-func-go \
+        /go/src/github.com/vladbarosan/test-func-go;
     go build -buildmode=plugin -o bin/${function_dir}.so main.go"
 
 az functionapp deployment user set \

@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Azure/azure-functions-go/azfunc"
+	"github.com/vladbarosan/test-func-go/azfunc"
 )
 
 // Run runs this Azure Function because it is specified in `function.json` as

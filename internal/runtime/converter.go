@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Azure/azure-functions-go/internal/rpc"
+	"github.com/vladbarosan/test-func-go/internal/rpc"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -1,4 +1,4 @@
-module github.com/Azure/azure-functions-go
+module github.com/vladbarosan/test-func-go
 
 require (
 	github.com/golang/protobuf v1.2.0

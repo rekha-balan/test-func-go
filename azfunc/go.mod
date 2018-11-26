@@ -1,1 +1,1 @@
-module github.com/Azure/azure-functions-go/azfunc
+module github.com/vladbarosan/test-func-go/azfunc

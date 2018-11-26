@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/Azure/azure-functions-go/azfunc"
+	"github.com/vladbarosan/test-func-go/azfunc"
 )
 
 //go:generate env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -buildmode=plugin -o bin/HttpTriggerBlobBindings.so main.go

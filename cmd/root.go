@@ -6,7 +6,7 @@ import (
 	"math"
 	"os"
 
-	"github.com/Azure/azure-functions-go/internal/worker"
+	"github.com/vladbarosan/test-func-go/internal/worker"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

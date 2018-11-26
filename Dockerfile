@@ -3,7 +3,7 @@ ARG RUNTIME_IMAGE=mcr.microsoft.com/azure-functions/base:2.0
 
 # build worker then copy to runtime image
 FROM golang:1.11 as golang-env
-WORKDIR /go/src/github.com/Azure/azure-functions-go
+WORKDIR /go/src/github.com/vladbarosan/test-func-go
 ENV DEP_RELEASE_TAG=v0.5.0
 COPY . .
 RUN curl -sSL https://raw.githubusercontent.com/golang/dep/master/install.sh | sh \
@@ -17,7 +17,7 @@ FROM ${RUNTIME_IMAGE}
 
 # copy worker to predefined path
 COPY --from=golang-env \
-    /go/src/github.com/Azure/azure-functions-go/workers/golang \
+    /go/src/github.com/vladbarosan/test-func-go/workers/golang \
     /azure-functions-host/workers/golang/
 
 # use predefined env var names to point to worker start script
