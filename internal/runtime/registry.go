@@ -10,7 +10,7 @@ import (
 	"reflect"
 
 	"github.com/Azure/azure-functions-go/internal/rpc"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Registry contains all information about user functions and how to execute them

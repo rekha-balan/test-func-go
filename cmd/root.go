@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/Azure/azure-functions-go/internal/worker"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 

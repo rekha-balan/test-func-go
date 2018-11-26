@@ -3,7 +3,7 @@ package worker
 import (
 	"github.com/Azure/azure-functions-go/internal/rpc"
 	"github.com/Azure/azure-functions-go/internal/runtime"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type worker struct {

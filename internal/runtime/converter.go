@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-functions-go/internal/rpc"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 //FromProto converts protobuf parameters to golang values

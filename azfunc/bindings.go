@@ -91,7 +91,7 @@ type EventHubEvent struct {
 	PartitionKey    *string                `json:"PartitionKey"`
 	SequenceNumber  int                    `json:"SequenceNumber"`
 	Offset          int                    `json:"Offset"`
-	EnqueuedTimeUtc time.Time              `json:"EnqueuedTimeUtc"`
+	EnqueuedTimeUTC time.Time              `json:"EnqueuedTimeUtc"`
 	Properties      map[string]interface{} `json:"Properties"`
 }
 
@@ -101,8 +101,8 @@ type SBMsg struct {
 	MessageID        string                 `json:"MessageId"`
 	DeliveryCount    uint32                 `json:"DeliveryCount"`
 	SequenceNumber   int64                  `json:"SequenceNumber"`
-	ExpiresAtUtc     time.Time              `json:"ExpiresAtUtc"`
-	EnqueuedTimeUtc  time.Time              `json:"EnqueuedTimeUtc"`
+	ExpiresAtUTC     time.Time              `json:"ExpiresAtUtc"`
+	EnqueuedTimeUTC  time.Time              `json:"EnqueuedTimeUtc"`
 	ReplyTo          *string                `json:"ReplyTo"`
 	To               *string                `json:"To"`
 	CorrelationID    *string                `json:"CorrelationId"`

@@ -2,9 +2,7 @@
 
 [![Build Status](https://travis-ci.com/Azure/azure-functions-go.svg?token=pzfiiBDjqjzLCtQCMpq1&branch=dev)](https://travis-ci.com/Azure/azure-functions-go)
 
-This project adds Go support to Azure Functions by implementing a [language
-
-worker][] for Go. It requires the following:
+This project adds Go support to Azure Functions by implementing a [language worker][] for Go. It requires the following:
 
 - Go 1.10+
 - Linux or OS X
